@@ -4,7 +4,6 @@ Ansible-Role: 389-ds
 =========
 
 An role which install 389 Directory Server on RedHat/Debian servers.
-Purpose of this role is to perform base installation
 
 Requirements
 ------------
