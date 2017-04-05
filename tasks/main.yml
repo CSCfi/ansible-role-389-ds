@@ -1,0 +1,47 @@
+---
+# tasks file for 389-ds
+- name: 389-ds | Repository | Add | Epel
+  yum: name=epel-release state=present
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Centos"
+
+- name: 389-ds | Initialize
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_os_family }}.yml"
+    - "default.yml"
+  when: __dirsrv_packages is not defined or dirsrv_service_name is not defined
+
+- name: 389-ds | Define | Packages
+  set_fact:
+    dirsrv_packages: "{{ __dirsrv_packages | list }}"
+  when: dirsrv_packages is not defined
+
+- name: 389-ds | Install
+  package: name={{ item }} state={{ dirsrv_state }}
+  with_items: "{{ dirsrv_packages }}"
+
+- name: 389-ds | Performance | tune
+  lineinfile:
+    dest: "{{ item.dest }}"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+#   - { dest: "/etc/openldap/ldap.conf", regexp: '^TLS_REQCERT', line: 'TLS_REQCERT allow' }
+    - { dest: "/etc/sysctl.conf", regexp: '^fs.file-max', line: 'fs.file-max = 64000' }
+    - { dest: "/etc/sysctl.conf", regexp: '^net.ipv4.ip_local_port_range', line: 'net.ipv4.ip_local_port_range = 1024 65000' }
+    - { dest: "/etc/sysctl.conf", regexp: '^net.ipv4.tcp_keepalive_time', line: 'net.ipv4.tcp_keepalive_time = 300' }
+    - { dest: "/etc/security/limits.conf", regexp: '^soft nofile', line: 'soft nofile 8192' }
+    - { dest: "/etc/security/limits.conf", regexp: '^hard nofile', line: 'hard nofile 8192' }
+
+- name: 389-ds | Silent setup file 
+  template: src=templates/master.inf dest=/tmp/master.inf
+
+- name: 389-ds | setup-ds-admin.pl | Execute
+  shell: /usr/sbin/{{ dirsrv_setupdsadmin }} --silent --file=/tmp/master.inf --logfile=/tmp/389install.log creates=/etc/dirsrv/slapd-{{ dirsrv_hostname }}/dse.ldif
+
+- name: 389-ds | Enable | service
+  service:
+    name: "{{ dirsrv_service_name }}.target"
+    state: started
+    enabled: yes
+

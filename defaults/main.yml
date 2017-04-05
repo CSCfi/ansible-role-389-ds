@@ -1,0 +1,14 @@
+---
+# defaults file for 389-ds
+
+# 389-ds
+dirsrv_state: latest
+dirsrv_fqdn: "{{ ansible_fqdn }}"
+dirsrv_password: changeMe
+dirsrv_rootdn: "cn=Directory Manager"
+dirsrv_hostname: "{{ dirsrv_fqdn.split('.')[0] }}"
+dirsrv_suffix: "dc={{ dirsrv_fqdn.split('.')[-2] }},dc={{ dirsrv_fqdn.split('.')[-1] }}"
+
+# Administration server
+dirsrv_admin_password: "{{ dirsrv_password }}"
+dirsrv_admin_domain: "{{ dirsrv_fqdn.split('.')[1:] | join('.') }}"
