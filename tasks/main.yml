@@ -27,9 +27,9 @@
     line: "{{ item.line }}"
   with_items:
 #   - { dest: "/etc/openldap/ldap.conf", regexp: '^TLS_REQCERT', line: 'TLS_REQCERT allow' }
-    - { dest: "/etc/sysctl.conf", regexp: '^fs.file-max', line: 'fs.file-max = 64000' }
-    - { dest: "/etc/sysctl.conf", regexp: '^net.ipv4.ip_local_port_range', line: 'net.ipv4.ip_local_port_range = 1024 65000' }
-    - { dest: "/etc/sysctl.conf", regexp: '^net.ipv4.tcp_keepalive_time', line: 'net.ipv4.tcp_keepalive_time = 300' }
+#    - { dest: "/etc/sysctl.conf", regexp: '^fs.file-max', line: 'fs.file-max = 64000' }
+#    - { dest: "/etc/sysctl.conf", regexp: '^net.ipv4.ip_local_port_range', line: 'net.ipv4.ip_local_port_range = 1024 65000' }
+#    - { dest: "/etc/sysctl.conf", regexp: '^net.ipv4.tcp_keepalive_time', line: 'net.ipv4.tcp_keepalive_time = 300' }
     - { dest: "/etc/security/limits.conf", regexp: '^soft nofile', line: 'soft nofile 8192' }
     - { dest: "/etc/security/limits.conf", regexp: '^hard nofile', line: 'hard nofile 8192' }
 
