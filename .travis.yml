@@ -1,6 +1,10 @@
 ---
 services: docker
 
+addons:
+  hosts:
+    - testing.local
+
 env:
   - container_id: $(mktemp)
     distribution: centos
@@ -12,10 +16,6 @@ env:
     version: 8
     init: /usr/lib/systemd/systemd
     run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-
-addons:
-  hosts:
-    - testing.local
 
 before_install:
   - sudo apt-get update
