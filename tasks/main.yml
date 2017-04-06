@@ -39,7 +39,7 @@
     - { name: net.ipv4.tcp_keepalive_time, value: 300 }
     - { name: net.ipv4.ip_local_port_range, value: "1024 65000" }
     - { name: fs.file-max, value: 64000 }
-  ignore_errors: true
+  when: dirsrv_fqdn is not local.dev
       
 - name: Configure file descriptors for dirsrv systemd service
   lineinfile:
@@ -47,6 +47,7 @@
     state=present
     insertafter="^[Service]"
     line=LimitNOFILE=8192
+  when: dirsrv_fqdn is not local.dev
 
 - name: 389-ds | Silent setup file 
   template: src=templates/dirsrv.inf dest=/tmp/dirsrv.inf
