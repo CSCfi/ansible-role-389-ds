@@ -2,10 +2,6 @@
 services: docker
 
 env:
-  global:
-    - HOSTNAME testing.local
-    - MACHINE_NAME: testing
-
   - container_id: $(mktemp)
     distribution: centos
     version: 7
