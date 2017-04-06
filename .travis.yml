@@ -1,10 +1,6 @@
 ---
 services: docker
 
-addons:
-  hosts:
-    - testing.local
-
 env:
   - container_id: $(mktemp)
     distribution: centos
