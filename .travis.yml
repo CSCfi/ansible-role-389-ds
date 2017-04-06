@@ -13,10 +13,6 @@ env:
     init: /usr/lib/systemd/systemd
     run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
 
-addons:
-  hosts:
-    - travis.dev
-
 before_install:
   - sudo apt-get update
   # Pull container

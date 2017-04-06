@@ -2,4 +2,4 @@
 ---
 - hosts: all
   roles:
-    - { role: role_under_test, dirsrv_fqdn: travis.dev } 
+    - { role: role_under_test, dirsrv_fqdn: local.dev } 
