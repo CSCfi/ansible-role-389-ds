@@ -20,18 +20,32 @@
   package: name={{ item }} state={{ dirsrv_state }}
   with_items: "{{ dirsrv_packages }}"
 
-- name: 389-ds | Performance | tune
-  lineinfile:
-    dest: "{{ item.dest }}"
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-  with_items:
+  #- name: 389-ds | Performance | tune
+  #  lineinfile:
+  #    dest: "{{ item.dest }}"
+  #    regexp: "{{ item.regexp }}"
+  #    line: "{{ item.line }}"
+  #  with_items:
 #   - { dest: "/etc/openldap/ldap.conf", regexp: '^TLS_REQCERT', line: 'TLS_REQCERT allow' }
 #    - { dest: "/etc/sysctl.conf", regexp: '^fs.file-max', line: 'fs.file-max = 64000' }
 #    - { dest: "/etc/sysctl.conf", regexp: '^net.ipv4.ip_local_port_range', line: 'net.ipv4.ip_local_port_range = 1024 65000' }
 #    - { dest: "/etc/sysctl.conf", regexp: '^net.ipv4.tcp_keepalive_time', line: 'net.ipv4.tcp_keepalive_time = 300' }
-    - { dest: "/etc/security/limits.conf", regexp: '^soft nofile', line: 'soft nofile 8192' }
-    - { dest: "/etc/security/limits.conf", regexp: '^hard nofile', line: 'hard nofile 8192' }
+#    - { dest: "/etc/security/limits.conf", regexp: '^soft nofile', line: '* soft nofile 8192' }
+#    - { dest: "/etc/security/limits.conf", regexp: '^hard nofile', line: '* hard nofile 8192' }
+
+- name: Configure sysctl variables
+  sysctl: name={{item.name}}  value={{item.value}} sysctl_set=yes state=present
+  with_items:
+    - { name: net.ipv4.tcp_keepalive_time, value: 300 }
+    - { name: net.ipv4.ip_local_port_range, value: "1024 65000" }
+    - { name: fs.file-max, value: 64000 }
+      
+- name: Configure file descriptors for dirsrv systemd service
+  lineinfile:
+    dest=/etc/sysconfig/dirsrv.systemd
+    state=present
+    insertafter="^[Service]"
+    line=LimitNOFILE=8192
 
 - name: 389-ds | Silent setup file 
   template: src=templates/master.inf dest=/tmp/master.inf
