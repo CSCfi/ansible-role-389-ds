@@ -39,6 +39,7 @@
     - { name: net.ipv4.tcp_keepalive_time, value: 300 }
     - { name: net.ipv4.ip_local_port_range, value: "1024 65000" }
     - { name: fs.file-max, value: 64000 }
+  ignore_errors: true
       
 - name: Configure file descriptors for dirsrv systemd service
   lineinfile:
@@ -48,10 +49,10 @@
     line=LimitNOFILE=8192
 
 - name: 389-ds | Silent setup file 
-  template: src=templates/master.inf dest=/tmp/master.inf
+  template: src=templates/dirsrv.inf dest=/tmp/dirsrv.inf
 
 - name: 389-ds | setup-ds-admin.pl | Execute | {{ dirsrv_hostname }} | {{ dirsrv_fqdn }} | {{ dirsrv_suffix }} 
-  shell: /usr/sbin/{{ dirsrv_setupdsadmin }} --silent --file=/tmp/master.inf --logfile=/tmp/389install.log creates=/etc/dirsrv/slapd-{{ dirsrv_hostname }}/dse.ldif
+  shell: /usr/sbin/{{ dirsrv_setupdsadmin }} --silent --file=/tmp/dirsrv.inf --logfile=/tmp/389install.log creates=/etc/dirsrv/slapd-{{ dirsrv_hostname }}/dse.ldif
 
 - name: 389-ds | Enable | service
   service:
