@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/CSC-IT-Center-for-Science/ansible-role-apache.svg?branch=master)](https://travis-ci.org/CSC-IT-Center-for-Science/ansible-role-apache)
+[![Build Status](https://travis-ci.org/CSCfi/ansible-role-389-ds.svg?branch=master)](https://travis-ci.org/CSCfi/ansible-role-389-ds)
 
 Ansible-Role: 389-ds
 =========
