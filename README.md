@@ -31,6 +31,6 @@ None
 Example Playbook
 ----------------
 
-    - hosts: ldapserver
+    - hosts: all
       roles:
         - { role: CSCfi.389-ds }
