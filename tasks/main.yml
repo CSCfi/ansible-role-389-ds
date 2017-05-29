@@ -3,6 +3,8 @@
 - name: 389-ds | Repository | Add | Epel
   yum: name=epel-release state=present
   when: ansible_os_family == "RedHat" or ansible_os_family == "Centos"
+  
+- lineinfile: dest=/etc/hosts regexp="^{{ ansible_default_ipv4.address }}" line="{{ ansible_default_ipv4.address }} {{ dirsrv_fqdn }} {{ dirsrv_hostname }}"
 
 - name: 389-ds | Initialize
   include_vars: "{{ item }}"
