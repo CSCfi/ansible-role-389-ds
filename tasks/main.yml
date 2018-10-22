@@ -4,8 +4,12 @@
   yum: name=epel-release state=present
   when: ansible_os_family == "RedHat" or ansible_os_family == "Centos"
   
-- lineinfile: dest=/etc/hosts regexp="^{{ ansible_default_ipv4.address }}" line="{{ ansible_default_ipv4.address }} {{ dirsrv_fqdn }} {{ dirsrv_hostname }}"
-
+#- lineinfile: dest=/etc/hosts regexp="^{{ ansible_default_ipv4.address }}" line="{{ ansible_default_ipv4.address }} {{ dirsrv_fqdn }} {{ dirsrv_hostname }}"
+- name: Insert IP-address and hostname
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ ansible_default_ipv4.address }} {{ dirsrv_fqdn }} {{ dirsrv_hostname }}"
+        
 - name: 389-ds | Initialize
   include_vars: "{{ item }}"
   with_first_found:
