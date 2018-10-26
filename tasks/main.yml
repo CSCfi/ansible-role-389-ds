@@ -1,15 +1,16 @@
 ---
 # tasks file for 389-ds
-- name: 389-ds | Repository | Add | Epel
-  yum: name=epel-release state=present
-  when: ansible_os_family == "RedHat" or ansible_os_family == "Centos"
-  
-#- lineinfile: dest=/etc/hosts regexp="^{{ ansible_default_ipv4.address }}" line="{{ ansible_default_ipv4.address }} {{ dirsrv_fqdn }} {{ dirsrv_hostname }}"
-- name: Insert IP-address and hostname
-      lineinfile:
-        path: /etc/hosts
-        line: "{{ ansible_default_ipv4.address }} {{ dirsrv_fqdn }} {{ dirsrv_hostname }}"
-        
+- name: Add Epel repository
+  yum: 
+    name: epel-release 
+    state: present
+
+- name: Add host | Add IP and FQDN to /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    regexp: "^{{ ansible_default_ipv4.address }}"
+    line: "{{ ansible_default_ipv4.address }} {{ dirsrv_fqdn }} {{ dirsrv_hostname }}"
+
 - name: 389-ds | Initialize
   include_vars: "{{ item }}"
   with_first_found:
@@ -17,53 +18,64 @@
     - "default.yml"
   when: __dirsrv_packages is not defined or dirsrv_service_name is not defined
 
-- name: 389-ds | Define | Packages
+- name: Define 389-ds packages
   set_fact:
     dirsrv_packages: "{{ __dirsrv_packages | list }}"
   when: dirsrv_packages is not defined
 
-- name: 389-ds | Install
-  package: name={{ item }} state={{ dirsrv_state }}
+
+- name: 389-ds | Install packages (yum)
+  yum:
+    name: "{{ item }}" #"{{ dirsrv_state }}"
+    state: present
   with_items: "{{ dirsrv_packages }}"
+  tags:
+    - 389-ds
+    - install
 
-  #- name: 389-ds | Performance | tune
-  #  lineinfile:
-  #    dest: "{{ item.dest }}"
-  #    regexp: "{{ item.regexp }}"
-  #    line: "{{ item.line }}"
-  #  with_items:
-#   - { dest: "/etc/openldap/ldap.conf", regexp: '^TLS_REQCERT', line: 'TLS_REQCERT allow' }
-#    - { dest: "/etc/sysctl.conf", regexp: '^fs.file-max', line: 'fs.file-max = 64000' }
-#    - { dest: "/etc/sysctl.conf", regexp: '^net.ipv4.ip_local_port_range', line: 'net.ipv4.ip_local_port_range = 1024 65000' }
-#    - { dest: "/etc/sysctl.conf", regexp: '^net.ipv4.tcp_keepalive_time', line: 'net.ipv4.tcp_keepalive_time = 300' }
-#    - { dest: "/etc/security/limits.conf", regexp: '^soft nofile', line: '* soft nofile 8192' }
-#    - { dest: "/etc/security/limits.conf", regexp: '^hard nofile', line: '* hard nofile 8192' }
 
-- name: Configure sysctl variables
-  sysctl: name={{item.name}}  value={{item.value}} sysctl_set=yes state=present
+- name: Sysctl | Configure
+  sysctl:
+    name: "{{item.name}}"
+    value: "{{item.value}}"
+    sysctl_set: yes
+    state: present
   with_items:
     - { name: net.ipv4.tcp_keepalive_time, value: 300 }
     - { name: net.ipv4.ip_local_port_range, value: "1024 65000" }
     - { name: fs.file-max, value: 64000 }
   when: dirsrv_fqdn != "local.dev"
+  tags:
+    - sysctl
+    - configure
       
-- name: Configure file descriptors for dirsrv systemd service
+- name: Dirsrv systemd service | Configure file descriptors 
   lineinfile:
-    dest=/etc/sysconfig/dirsrv.systemd
-    state=present
-    insertafter="^[Service]"
-    line=LimitNOFILE=8192
+    path: /etc/sysconfig/dirsrv.systemd
+    state: present
+    insertafter: "^[Service]"
+    line: LimitNOFILE=8192
   when: dirsrv_fqdn != "local.dev"
+  tags:
+    - 389-ds
+    - systemd
 
 - name: 389-ds | Silent setup file 
-  template: src=templates/dirsrv.inf dest=/tmp/dirsrv.inf
+  template: 
+    src: templates/dirsrv.inf 
+    dest: /tmp/dirsrv.inf
+  tags:
+    - 389-ds
 
 - name: 389-ds | setup-ds-admin.pl | Execute | {{ dirsrv_hostname }} | {{ dirsrv_fqdn }} | {{ dirsrv_suffix }} 
   shell: /usr/sbin/{{ dirsrv_setupdsadmin }} --silent --file=/tmp/dirsrv.inf --logfile=/tmp/389install.log creates=/etc/dirsrv/slapd-{{ dirsrv_hostname }}/dse.ldif
 
 - name: 389-ds | Enable | service
   service:
-    name: "{{ dirsrv_service_name }}.target"
+    name: "{{ item }}"
     state: started
     enabled: yes
+  with_items: 
+    - dirsrv.target
+    - dirsrv-admin.service
 
