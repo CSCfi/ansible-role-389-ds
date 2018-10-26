@@ -85,5 +85,5 @@
     enabled: yes
   with_items: 
     - dirsrv.target
-    - dirsrv-admin.servic
+    - dirsrv-admin.service
 
